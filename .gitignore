@@ -1,3 +1,5 @@
 .vs
 .venv
 .env
+__pycache__/agent.cpython-314.pyc
+testagent/__pycache__/
