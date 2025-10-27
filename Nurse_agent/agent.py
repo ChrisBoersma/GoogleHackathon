@@ -5,7 +5,13 @@ import pandas as pd
 def get_random_measurement(patient: str) -> dict:
     """Returns a random measurement of the patient."""
     data = pd.read_csv("Data\\post-operative-data-with-names.csv")
+    # 1. Filter for the patient's data (case-insensitive partial match)
     data_filtered_parial = data[data['Name'].str.contains(patient, case=False, na=False)]
+    
+    # Check if patient was found
+    if data_filtered_parial.empty:
+        return {"status": "error", "message": f"Patient '{patient}' not found."}
+    
     df_subset = data_filtered_parial.iloc[:, :-2]
     all_values_series = df_subset.stack()
     random_value = all_values_series.sample(n=1)
