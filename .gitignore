@@ -3,3 +3,4 @@
 .env
 __pycache__/agent.cpython-314.pyc
 testagent/__pycache__/
+datascientist_agent/agent.py
