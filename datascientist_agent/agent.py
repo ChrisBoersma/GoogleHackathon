@@ -7,32 +7,31 @@ import numpy as np
 import pickle
 import os
 
-
 def get_train_data(filename: str) -> str:
     """Open a csv file and saves the training data to a pickle file and returns the path."""
-    data = pd.read_csv(f"Data/{filename}")
-    pickle_path = f"/home/bazarow/Projects/GoogleHackathon/temp_pickle_data/{filename.split('.')[0]}.pickle"
+    data = pd.read_csv("./Data/"  + filename)
+    pickle_path = f"/home/bazarow/Projects/GoogleHackathon/temp_pickle_data/{filename.split('/')[-1].split('.')[0]}.pickle"
     data.to_pickle(pickle_path)
     return pickle_path
 
-def drop_columns_without_data(data_path:str, patient_data:str) -> str:
-    """Filters the data to only keep columns present in patient_data and 'decision ADM-DECS'."""
+def drop_columns_without_data(data_path:str, patient_data:str, target_column: str) -> str:
+    """Filters the data to only keep columns present in patient_data and the target column."""
     df = pd.read_pickle(data_path)
     patient_df = pd.read_json(patient_data)
     
     patient_columns = patient_df.columns.tolist()
-    columns_to_keep = patient_columns + ['decision ADM-DECS']
+    columns_to_keep = patient_columns + [target_column]
     
     # Ensure only existing columns are selected
     existing_columns_to_keep = [col for col in columns_to_keep if col in df.columns]
     
     filtered_df = df[existing_columns_to_keep]
-    filtered_data_path = "/home/bazarow/Projects/GoogleHackathon/temp_pickle_data/filtered_post-operative-data.pickle"
+    filtered_data_path = f"/home/bazarow/Projects/GoogleHackathon/temp_pickle_data/filtered_{data_path.split('/')[-1]}"
     filtered_df.to_pickle(filtered_data_path)
     return filtered_data_path
 
-def predict_using_decision_tree(data_path: str, patient_data: str) -> str:
-    """Creates a decision tree from the given data and returns the prediction. Only use this function if you have made sure the data and the patient data have the same predictions columns"""
+def predict_using_decision_tree(data_path: str, patient_data: str, target_column: str) -> str:
+    """Creates a decision tree from the given data and returns the prediction. Only use this function if you have made sure the data and the patient data have the same labelled columns"""
     df = pd.read_pickle(data_path)
     df = df.replace('?', np.nan)
     df = df.dropna()
@@ -42,8 +41,8 @@ def predict_using_decision_tree(data_path: str, patient_data: str) -> str:
             le = LabelEncoder()
             df[col] = le.fit_transform(df[col])
             encoders[col] = le
-    X = df.drop('decision ADM-DECS', axis=1)
-    y = df['decision ADM-DECS']
+    X = df.drop(target_column, axis=1)
+    y = df[target_column]
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=None, random_state=42)
     clf = DecisionTreeClassifier()
     clf.fit(X_train, y_train)
@@ -56,9 +55,12 @@ def predict_using_decision_tree(data_path: str, patient_data: str) -> str:
             patient_df[col] = patient_df[col].apply(lambda x: x if x in known_labels else known_labels[0])
             patient_df[col] = le.transform(patient_df[col])
     prediction = clf.predict(patient_df)
-    return str(prediction)
+    if target_column in encoders:
+        le = encoders[target_column]
+        prediction = le.inverse_transform(prediction)
+    return str(prediction[0])
 
-def create_record(name : str) -> str:
+def create_record_patient(name : str) -> str:
     """Creates a patient record and returns it as a JSON string."""
     patient_data = pd.DataFrame({
         'L-CORE': ['low'],
@@ -69,6 +71,49 @@ def create_record(name : str) -> str:
     })
     return patient_data.to_json()
 
+def create_record_animal() -> str:
+    """Creates an animal record and returns it as a JSON string."""
+    animal_data = pd.DataFrame({
+        'hair': [1],
+        'feathers': [0],
+        'eggs': [0],
+        'milk': [1],
+        'airborne': [0],
+        'aquatic': [0],
+        'predator': [1],
+        'toothed': [1],
+        'backbone': [1],
+        'breathes': [1],
+        'venomous': [0],
+        'fins': [0],
+        'legs': [4],
+        'tail': [1],
+        'domestic': [0],
+        'catsize': [1]
+    })
+    return animal_data.to_json()
+
+def create_record_giraffe() -> str:
+    """Creates an animal record for a giraffe and returns it as a JSON string."""
+    animal_data = pd.DataFrame({
+        'hair': [1],
+        'feathers': [0],
+        'eggs': [0],
+        'milk': [1],
+        'airborne': [0],
+        'aquatic': [0],
+        'predator': [0],
+        'toothed': [1],
+        'backbone': [1],
+        'breathes': [1],
+        'venomous': [0],
+        'fins': [0],
+        'legs': [4],
+        'tail': [1],
+        'domestic': [0],
+        'catsize': [0]
+    })
+    return animal_data.to_json()
 
 def get_columns_name(file_path: str) -> list[str]:
     """Given a filepath for a pickle file, returns the corresponding column names."""
@@ -85,11 +130,14 @@ root_agent = Agent(
     model='gemini-2.5-flash',
     name='datascientist_agent',
     description="Answers questions about a dataset",
-    instruction="""You are a datascientist in an hospital. 
-    You get a patient with name. Use the create_record to get the values for the patient.
-    There is a dataset which you can get with get_train_data. Use this data to make a prediction using the filled in record for the patient.
+    instruction="""You are a datascientist.
+    You get a record which you can get by name. Use the create_record functions to get the values for the record. 
+    You can also be asked to predict a certain column. 
+    Check which dataset you need with get_column_names. If the column name is not a 1 on 1 match, you can decide which column is the best fit. 
+    You can also to determine how the prediction column is called.
+    Use this data to make a prediction using the filled in record for the patient.
     Return the prediction. Show your steps and thought process.
     """,
-    tools=[create_record,get_train_data,predict_using_decision_tree,drop_columns_without_data, get_columns_name, list_data_files],
+    tools=[create_record_patient, create_record_animal, create_record_giraffe, get_train_data,predict_using_decision_tree,drop_columns_without_data, get_columns_name, list_data_files],
     sub_agents=[],
 )
