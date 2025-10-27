@@ -1,7 +1,0 @@
-.vs
-.venv
-.env
-__pycache__/agent.cpython-314.pyc
-**/**/__pycache__/*
-Nurse_agent/__pycache__/__init__.cpython-314.pyc
-Nurse_agent/__pycache__/agent.cpython-314.pyc
