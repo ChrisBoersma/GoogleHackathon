@@ -5,11 +5,13 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 import numpy as np
 import pickle
+import os
 
-def get_train_data() -> str:
-    """Saves the training data to a pickle file and returns the path."""
-    data = pd.read_csv("Data/post-operative-data.csv")
-    pickle_path = "/home/bazarow/Projects/GoogleHackathon/Data/post-operative-data.pickle"
+
+def get_train_data(filename: str) -> str:
+    """Open a csv file and saves the training data to a pickle file and returns the path."""
+    data = pd.read_csv(f"Data/{filename}")
+    pickle_path = f"/home/bazarow/Projects/GoogleHackathon/temp_pickle_data/{filename.split('.')[0]}.pickle"
     data.to_pickle(pickle_path)
     return pickle_path
 
@@ -25,12 +27,12 @@ def drop_columns_without_data(data_path:str, patient_data:str) -> str:
     existing_columns_to_keep = [col for col in columns_to_keep if col in df.columns]
     
     filtered_df = df[existing_columns_to_keep]
-    filtered_data_path = "/home/bazarow/Projects/GoogleHackathon/Data/filtered_post-operative-data.pickle"
+    filtered_data_path = "/home/bazarow/Projects/GoogleHackathon/temp_pickle_data/filtered_post-operative-data.pickle"
     filtered_df.to_pickle(filtered_data_path)
     return filtered_data_path
 
 def predict_using_decision_tree(data_path: str, patient_data: str) -> str:
-    """Creates a decision tree from the given data and returns the prediction."""
+    """Creates a decision tree from the given data and returns the prediction. Only use this function if you have made sure the data and the patient data have the same predictions columns"""
     df = pd.read_pickle(data_path)
     df = df.replace('?', np.nan)
     df = df.dropna()
@@ -42,7 +44,7 @@ def predict_using_decision_tree(data_path: str, patient_data: str) -> str:
             encoders[col] = le
     X = df.drop('decision ADM-DECS', axis=1)
     y = df['decision ADM-DECS']
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=None, random_state=42)
     clf = DecisionTreeClassifier()
     clf.fit(X_train, y_train)
     
@@ -63,12 +65,19 @@ def create_record(name : str) -> str:
         'L-SURF': ['low'],
         'L-O2': ['excellent'],
         'L-BP': ['mid'],
-        'SURF-STBL': ['stable'],
-        'CORE-STBL': ['stable'],
-        'BP-STBL': ['stable'],
-        'COMFORT': [15]
+        'SURF-STBL': ['stable']
     })
     return patient_data.to_json()
+
+
+def get_columns_name(file_path: str) -> list[str]:
+    """Given a filepath for a pickle file, returns the corresponding column names."""
+    df = pd.read_pickle(file_path)
+    return df.columns.tolist()
+
+def list_data_files() -> list[str]:
+    """Returns a list of filenames in the Data directory."""
+    return os.listdir('./Data')
 
 
 #todo state
@@ -81,6 +90,6 @@ root_agent = Agent(
     There is a dataset which you can get with get_train_data. Use this data to make a prediction using the filled in record for the patient.
     Return the prediction. Show your steps and thought process.
     """,
-    tools=[create_record,get_train_data,predict_using_decision_tree,drop_columns_without_data],
+    tools=[create_record,get_train_data,predict_using_decision_tree,drop_columns_without_data, get_columns_name, list_data_files],
     sub_agents=[],
 )
