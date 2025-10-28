@@ -14,7 +14,7 @@ from datascientist_agent.agent import root_agent as DataScientist_agent
 prepare_ds_input = LlmAgent(
     model='gemini-2.5-flash',
     name='PrepareDSInput',
-    instruction='''Take the input you received using all previous dataentries collected by the nursing agent for this individual and append the following text to it: "\n\nPredict the 'adm-decs' column."'''
+    instruction='''Take the input you received using all previous dataentries collected by the nursing agent for this individual. Only use all measurements and append the following text to it: "\n\nPredict the 'adm-decs' column."'''
 )
 
 def exit_loop(tool_context: ToolContext):
@@ -29,8 +29,8 @@ checker = LlmAgent(
     model='gemini-2.5-flash',
     name='ConfidenceChecker',
     instruction='''You will be given a string containing a prediction and a certainty percentage, like "Prediction: A, Certainty: 95.00%".
-    Your task is to check if the certainty is 60% or higher.
-    - If the certainty is 60% or higher,     You MUST call the 'exit_loop' function. Do not output any text.
+    Your task is to check if the certainty is 90% or higher.
+    - If the certainty is 90% or higher,     You MUST call the 'exit_loop' function. Do not output any text.
     - If there is no certainty, output the original text and continue the loop!''',
     tools=[exit_loop]
 
