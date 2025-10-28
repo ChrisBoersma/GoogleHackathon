@@ -4,9 +4,7 @@ from google.adk.agents.invocation_context import InvocationContext
 from typing import AsyncGenerator
 
 from Doctor.sub_agents.PatientCommunication.agent import PatientCommunication_agent
-from Doctor.sub_agents.PatientIntake.agent import PatientIntake_agent as PatientIntake_agent
 from Nurse_agent.agent import root_agent as Nurse_LLMAgent
-
 from datascientist_agent.agent import create_record,get_train_data,predict_using_decision_tree,drop_columns_without_data
 
 # Data Scientist agent for analysis
@@ -64,7 +62,6 @@ data_gathering_loop = LoopAgent(
 root_agent = SequentialAgent(
     name='DoctorWorkflow',
     sub_agents=[
-        PatientIntake_agent,
         data_gathering_loop,
         PatientCommunication_agent,
     ]
