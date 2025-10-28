@@ -128,8 +128,9 @@ root_agent = Agent(
     model='gemini-2.5-flash',
     name='datascientist_agent',
     description="Answers questions about a dataset",
+    
     instruction="""You are a datascientist.
-    You get a record which you can get by name. Use the create_record functions to get the values for the record. 
+    You get a record.
     You can also be asked to predict a certain column. 
     Check which dataset you need with get_column_names. If the column name is not a 1 on 1 match, you can decide which column is the best fit. 
     If there is no target column given, ask for one.
@@ -137,6 +138,6 @@ root_agent = Agent(
     Use this data to make a prediction using the filled in record for the patient.
     Return the prediction. Show your steps and thought process.
     """,
-    tools=[create_record_patient, get_train_data, predict_using_random_forest,drop_columns_without_data, get_columns_name, list_data_files, create_record_animal_by_name],
+    tools=[get_train_data, predict_using_random_forest,drop_columns_without_data, get_columns_name, list_data_files],
     sub_agents=[],
 )
