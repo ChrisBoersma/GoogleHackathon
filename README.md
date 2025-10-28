@@ -48,9 +48,17 @@ cp .env.example .env
 
 Open the newly created `.env` file and fill in the required values (e.g., Google API Key).
 
-## Running the model
+## Agent flow
+The agent, a doctor, will get the name of a patient from the user.
+It will ask the Nurse to do a random measurement.
+Then it will ask the data scientist to make a prediction.
+The datascientist will make a prediction based on the measurements.
+If the certainty is higher than 75% the doctor will say if the patient can be discharged, has to be kept, or has to go to the ICU.
+If the certainty is too low, the doctor will ask for another random measurement from the Nurse.
+After 5 measurements, if the certainty is still too low, the doctor will take the last prediction of the datascientist.
+## Running the agent
 
-You can start the model by doing
+You can start the agent by doing
 
 ```bash
 adk run Doctor
