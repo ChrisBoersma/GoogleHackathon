@@ -29,8 +29,8 @@ checker = LlmAgent(
     model='gemini-2.5-flash',
     name='ConfidenceChecker',
     instruction='''You will be given a string containing a prediction and a certainty percentage, like "Prediction: A, Certainty: 95.00%".
-    Your task is to check if the certainty is 90% or higher.
-    - If the certainty is 90% or higher,     You MUST call the 'exit_loop' function. Do not output any text.
+    Your task is to check if the certainty is 75% or higher.
+    - If the certainty is 75% or higher,     You MUST call the 'exit_loop' function. Do not output any text.
     - If there is no certainty, output the original text and continue the loop!''',
     tools=[exit_loop]
 

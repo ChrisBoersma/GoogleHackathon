@@ -33,7 +33,7 @@ Based on the decision, write a short message for the patient.
   - Reassure them that the medical team will be watching over them closely and providing the best possible care.
   - Maintain a calm and supportive tone.
 	
-- **If the certainty is below 90%:**
+- **If the certainty is below 75%:**
   - Address the patient by name.
   - Gently inform them that their condition requires closer monitoring because the certainty is too low.
   - Reassure them that the medical team will be watching over them closely and providing the best possible care.
