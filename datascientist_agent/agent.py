@@ -6,6 +6,7 @@ from sklearn.preprocessing import LabelEncoder
 import numpy as np
 import pickle
 import os
+from io import StringIO
 
 def get_train_data(filename: str) -> str:
     """Open a csv file and saves the training data to a pickle file and returns the path."""
@@ -17,7 +18,7 @@ def get_train_data(filename: str) -> str:
 def drop_columns_without_data(data_path:str, patient_data:str, target_column: str) -> str:
     """Filters the data to only keep columns present in patient_data and the target column."""
     df = pd.read_pickle(data_path)
-    patient_df = pd.read_json(patient_data)
+    patient_df = pd.read_json(StringIO(patient_data))
     
     patient_columns = patient_df.columns.tolist()
     columns_to_keep = patient_columns + [target_column]
@@ -83,53 +84,31 @@ def create_record_patient(name: str) -> str:
     if not patient_row.empty:
         # Exclude 'decision ADM-DECS' and 'Name' columns
         patient_data = patient_row.drop(columns=['decision ADM-DECS', 'Name'])
-        return patient_data.to_json(orient='records')
+        return patient_data.to_json()
     else:
         return f"No record found for name: {name}"
 
-def create_record_animal() -> str:
-    """Creates an animal record and returns it as a JSON string."""
-    animal_data = pd.DataFrame({
-        'hair': [1],
-        'feathers': [0],
-        'eggs': [0],
-        'milk': [1],
-        'airborne': [0],
-        'aquatic': [0],
-        'predator': [1],
-        'toothed': [1],
-        'backbone': [1],
-        'breathes': [1],
-        'venomous': [0],
-        'fins': [0],
-        'legs': [4],
-        'tail': [1],
-        'domestic': [0],
-        'catsize': [1]
-    })
-    return animal_data.to_json()
+def create_record_animal_by_name(name: str) -> str:
+    """Creates an animal record by name and returns it as a JSON string."""
+    
+    # Load the dataset
+    df = pd.read_csv('./Data/zoo.csv')
+    
+    # Correct column names by stripping leading/trailing spaces
+    df.columns = df.columns.str.strip()
+    
+    # Find the animal by name
+    # Case-insensitive search and stripping spaces from name column
+    animal_row = df[df['animal_name'].str.strip().str.lower() == name.lower()]
+    
+    if not animal_row.empty:
+        # Exclude 'class_type' and 'animal_name' columns
+        animal_data = animal_row.drop(columns=['class_type', 'animal_name'])
+        return animal_data.to_json()
+    else:
+        return f"No record found for name: {name}"
 
-def create_record_giraffe() -> str:
-    """Creates an animal record for a giraffe and returns it as a JSON string."""
-    animal_data = pd.DataFrame({
-        'hair': [1],
-        'feathers': [0],
-        'eggs': [0],
-        'milk': [1],
-        'airborne': [0],
-        'aquatic': [0],
-        'predator': [0],
-        'toothed': [1],
-        'backbone': [1],
-        'breathes': [1],
-        'venomous': [0],
-        'fins': [0],
-        'legs': [4],
-        'tail': [1],
-        'domestic': [0],
-        'catsize': [0]
-    })
-    return animal_data.to_json()
+
 
 def get_columns_name(file_path: str) -> list[str]:
     """Given a filepath for a pickle file, you can only access the pickle file if you have gotten the train data from the csv. returns the corresponding column names."""
@@ -158,6 +137,6 @@ root_agent = Agent(
     Use this data to make a prediction using the filled in record for the patient.
     Return the prediction. Show your steps and thought process.
     """,
-    tools=[create_record_patient, create_record_animal, create_record_giraffe, get_train_data,predict_using_random_forest,drop_columns_without_data, get_columns_name, list_data_files],
+    tools=[create_record_patient, get_train_data, predict_using_random_forest,drop_columns_without_data, get_columns_name, list_data_files, create_record_animal_by_name],
     sub_agents=[],
 )
