@@ -154,7 +154,7 @@ root_agent = Agent(
     instruction="""You are a datascientist.
     You get a record.
     You can also be asked to predict a certain column. 
-    Check which dataset you need with get_column_names. If the column name is not a 1 on 1 match, you can decide which column is the best fit. 
+    Check which dataset you need with get_columns_name. If the column name is not a 1 on 1 match, you can decide which column is the best fit. 
     If you dont have all the columns to make a prediction just use the columns you have by using the drop_columns_without_data function.
     If there is no target column given, ask for one.
     You can also to determine how the prediction column is called.
