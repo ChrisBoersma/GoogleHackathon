@@ -4,7 +4,7 @@ import pandas as pd
 # Mock tool implementation
 def get_random_measurement(patient: str) -> dict:
     """Returns a random measurement of the patient."""
-    data = pd.read_csv("Data\\post-operative-data-with-names.csv")
+    data = pd.read_csv("./Data/post-operative-data-with-names.csv")
     # 1. Filter for the patient's data (case-insensitive partial match)
     data_filtered_parial = data[data['Name'].str.contains(patient, case=False, na=False)]
     
@@ -24,7 +24,7 @@ def get_specific_measurement(patient: str, measurement_type: str):
     Returns a specific measurement of the patient, allowing for inexact 
     matching of the measurement_type
     """
-    data = pd.read_csv("Data\\post-operative-data-with-names.csv")
+    data = pd.read_csv("./Data/post-operative-data-with-names.csv")
     
     # 1. Filter for the patient's data (case-insensitive partial match)
     data_filtered_parial = data[data['Name'].str.contains(patient, case=False, na=False)]
