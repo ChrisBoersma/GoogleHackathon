@@ -48,19 +48,15 @@ cp .env.example .env
 
 Open the newly created `.env` file and fill in the required values (e.g., Google API Key).
 
-## Running the Simulation
+## Running the model
 
-The main simulation can be run using `simulation.py`.
-
-```bash
-python simulation.py
-```
-
-You can also run the doctor agent directly for testing purposes:
+You can start the model by doing
 
 ```bash
-python run_doctor.py
+adk run Doctor
 ```
+Then type the name of a patient to evaluate.
+For example "Christina Matinez"
 
 ## Project Structure
 
@@ -71,5 +67,3 @@ python run_doctor.py
 - `temp_pickle_data/`: Temporary storage for pickled data (user-created).
 - `.env.example`: Example file for environment variables.
 - `requirements.txt`: Lists project dependencies.
-- `simulation.py`: The main script to run the healthcare simulation.
-- `run_doctor.py`: Script to run the Doctor agent independently.
