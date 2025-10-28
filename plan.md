@@ -1,17 +1,31 @@
-# Plan to fix the Doctor Agent's workflow
+# Plan for the Doctor Agent
 
-1.  **Implement Callback Functions:** I will define a set of callback functions in `Doctor/agent.py`. These functions will be used to print information about the agent's execution flow and to implement a "human in the loop" for debugging.
-    - `before_tool_callback`: This function will be called before each tool call. It will print the tool name and arguments.
-    - `after_tool_callback`: This function will be called after each tool call. It will print the tool's output.
-    - `before_agent_callback`: This function will be called before each sub-agent call. It will print the sub-agent's name and input.
-    - `before_model_callback`: This function will be called before each model call. It will print the model's prompt.
+## 1. Project Goal
 
-2.  **Add Callbacks to the `Doctor` agent:** I will add the callback functions to the `Agent` constructor in `Doctor/agent.py`.
+To create a `Doctor` agent that orchestrates a diagnostic workflow. The agent will interact with the user to get a patient's name, then iteratively gather and analyze patient data using sub-agents until a confident diagnosis is reached. Finally, it will generate a patient-friendly message with the outcome.
 
-3.  **Test the Agent with Callbacks:** I will run the `Doctor` agent with the callbacks enabled. This will allow me to see the agent's execution flow in detail and to understand why it's not looping.
+## 2. High-Level Workflow
 
-4.  **Implement "Human in the Loop" with Callbacks:** I will use the `before_tool_callback` and `before_agent_callback` functions to implement a "human in the loop". The function will prompt the user for confirmation before each tool or sub-agent call.
+1.  **Patient Intake:** The agent will start by asking the user for the patient's name.
+2.  **Iterative Diagnosis Loop:** The agent will enter a loop that continues until the confidence score from the data scientist is 90% or higher.
+    a.  **Get Metric:** On the first iteration, it will ask the `NurseAgent` for a random metric. On subsequent iterations, it will ask for a specific metric recommended by the `DataScientistMetricAgent`.
+    b.  **Analyze Data:** The collected metric(s) will be passed to the `DataScientistAnalysisAgent` to get a prediction and a confidence score.
+    c.  **Check Confidence:** If the score is below 90%, the `DataScientistMetricAgent` will be called to determine the next best metric to collect.
+3.  **Patient Communication:** Once the loop terminates, the final prediction will be passed to the `PatientCommunicationAgent` to generate a message for the patient.
 
-5.  **Analyze the Agent's Behavior:** With the detailed information from the callbacks, I will analyze the agent's behavior and identify the root cause of the problem.
+## 3. Agent Composition
 
-6.  **Fix the Agent's Logic:** Based on the analysis, I will fix the agent's logic. This might involve changing the instructions, the agent's state, or the way the sub-agents are called.
+*   **`DoctorWorkflow` (`SequentialAgent`):** The root agent that will manage the overall workflow.
+    1.  `PatientIntakeAgent`
+    2.  `DataGatheringLoop`
+    3.  `PatientCommunicationAgent`
+
+*   **`DataGatheringLoop` (`LoopAgent`):** The loop will be structured as follows to ensure the correct flow of data:
+    1.  `NurseAgent`
+    2.  `DataScientistAnalysisAgent`
+    3.  `CheckCondition` (set to a 90% threshold)
+    4.  `DataScientistMetricAgent`
+
+## 4. Implementation Steps
+
+1.  **Implement `Doctor/agent.py`:** Write the Python code for the `Doctor` agent, defining and composing the `DoctorWorkflow` and `DataGatheringLoop` as described above.
