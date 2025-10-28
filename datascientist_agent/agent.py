@@ -19,6 +19,9 @@ def get_train_data(filename: str) -> str:
 def drop_columns_without_data(data_path:str, patient_data:str, target_column: str) -> str:
     """Filters the data to only keep columns present in patient_data and the target column."""
     df = pd.read_pickle(data_path)
+    if ':' in patient_data and not patient_data.strip().startswith('{'):
+        key, value = patient_data.split(':', 1)
+        patient_data = json.dumps({key.strip(): value.strip()})
     patient_data = patient_data.replace("'", '"')
     try:
         patient_df = pd.read_json(StringIO(patient_data))
@@ -57,6 +60,9 @@ def predict_using_random_forest(data_path: str, patient_data: str, target_column
     clf = RandomForestClassifier(n_estimators=100)
     clf.fit(X, y)
     
+    if ':' in patient_data and not patient_data.strip().startswith('{'):
+        key, value = patient_data.split(':', 1)
+        patient_data = json.dumps({key.strip(): value.strip()})
     patient_data = patient_data.replace("'", '"')
     try:
         patient_df = pd.read_json(StringIO(patient_data))
@@ -149,6 +155,7 @@ root_agent = Agent(
     You get a record.
     You can also be asked to predict a certain column. 
     Check which dataset you need with get_column_names. If the column name is not a 1 on 1 match, you can decide which column is the best fit. 
+    If you dont have all the columns to make a prediction just use the columns you have by using the drop_columns_without_data function.
     If there is no target column given, ask for one.
     You can also to determine how the prediction column is called.
     Use this data to make a prediction using the filled in record for the patient.
