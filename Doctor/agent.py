@@ -10,7 +10,7 @@ from datascientist_agent.agent import root_agent as DataScientist_agent
 prepare_ds_input = LlmAgent(
     model='gemini-2.5-flash',
     name='PrepareDSInput',
-    instruction='''Take the input you receive and append the following text to it: "\n\nPredict the 'adm-decs' column."'''
+    instruction='''Take the input you received using all previous dataentries collected by the nursing agent for this individual and append the following text to it: "\n\nPredict the 'adm-decs' column."'''
 )
 
 # Agent to check the termination condition
