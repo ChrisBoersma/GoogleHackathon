@@ -19,6 +19,7 @@ def get_train_data(filename: str) -> str:
 def drop_columns_without_data(data_path:str, patient_data:str, target_column: str) -> str:
     """Filters the data to only keep columns present in patient_data and the target column."""
     df = pd.read_pickle(data_path)
+    patient_data = patient_data.replace("'", '"')
     try:
         patient_df = pd.read_json(StringIO(patient_data))
     except ValueError as e:
@@ -39,7 +40,8 @@ def drop_columns_without_data(data_path:str, patient_data:str, target_column: st
     return filtered_data_path
 
 def predict_using_random_forest(data_path: str, patient_data: str, target_column: str) -> str:
-    """Creates a random forest from the given data and returns the prediction and the certainty of the prediction. Only use this function if you have made sure the data and the patient data have the same labelled columns"""
+    """Creates a random forest from the given data and returns the prediction and the certainty of the prediction. 
+    Only use this function if you have made sure the data and the patient data have the same labelled columns"""
     df = pd.read_pickle(data_path)
     df = df.replace('?', np.nan)
     df = df.dropna()
@@ -55,6 +57,7 @@ def predict_using_random_forest(data_path: str, patient_data: str, target_column
     clf = RandomForestClassifier(n_estimators=100)
     clf.fit(X, y)
     
+    patient_data = patient_data.replace("'", '"')
     try:
         patient_df = pd.read_json(StringIO(patient_data))
     except ValueError as e:
