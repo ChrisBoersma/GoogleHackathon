@@ -1,6 +1,6 @@
 from google.adk.agents.llm_agent import Agent
 import pandas as pd
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 import numpy as np
@@ -30,8 +30,8 @@ def drop_columns_without_data(data_path:str, patient_data:str, target_column: st
     filtered_df.to_pickle(filtered_data_path)
     return filtered_data_path
 
-def predict_using_decision_tree(data_path: str, patient_data: str, target_column: str) -> str:
-    """Creates a decision tree from the given data and returns the prediction. Only use this function if you have made sure the data and the patient data have the same labelled columns"""
+def predict_using_random_forest(data_path: str, patient_data: str, target_column: str) -> str:
+    """Creates a random forest from the given data and returns the prediction and the certainty of the prediction. Only use this function if you have made sure the data and the patient data have the same labelled columns"""
     df = pd.read_pickle(data_path)
     df = df.replace('?', np.nan)
     df = df.dropna()
@@ -43,9 +43,9 @@ def predict_using_decision_tree(data_path: str, patient_data: str, target_column
             encoders[col] = le
     X = df.drop(target_column, axis=1)
     y = df[target_column]
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=None, random_state=42)
-    clf = DecisionTreeClassifier()
-    clf.fit(X_train, y_train)
+
+    clf = RandomForestClassifier(n_estimators=100)
+    clf.fit(X, y)
     
     patient_df = pd.read_json(patient_data)
     for col, le in encoders.items():
@@ -54,22 +54,38 @@ def predict_using_decision_tree(data_path: str, patient_data: str, target_column
             # Replace unseen labels with the first known label
             patient_df[col] = patient_df[col].apply(lambda x: x if x in known_labels else known_labels[0])
             patient_df[col] = le.transform(patient_df[col])
-    prediction = clf.predict(patient_df)
+    
+    prediction_encoded = clf.predict(patient_df)
+    prediction_proba = clf.predict_proba(patient_df)
+    
+    certainty = np.max(prediction_proba)
+
+    prediction = prediction_encoded
     if target_column in encoders:
         le = encoders[target_column]
-        prediction = le.inverse_transform(prediction)
-    return str(prediction[0])
+        prediction = le.inverse_transform(prediction_encoded)
 
-def create_record_patient(name : str) -> str:
-    """Creates a patient record and returns it as a JSON string."""
-    patient_data = pd.DataFrame({
-        'L-CORE': ['low'],
-        'L-SURF': ['low'],
-        'L-O2': ['excellent'],
-        'L-BP': ['mid'],
-        'SURF-STBL': ['stable']
-    })
-    return patient_data.to_json()
+    return f"Prediction: {prediction[0]}, Certainty: {certainty:.2%}"
+
+def create_record_patient(name: str) -> str:
+    """Creates a patient record by name and returns it as a JSON string."""
+    
+    # Load the dataset
+    df = pd.read_csv('/home/bazarow/Projects/GoogleHackathon/Data/post-operative-data-with-names.csv')
+    
+    # Correct column names by stripping leading/trailing spaces
+    df.columns = df.columns.str.strip()
+    
+    # Find the patient by name
+    # Case-insensitive search and stripping spaces from name column
+    patient_row = df[df['Name'].str.strip().str.lower() == name.lower()]
+    
+    if not patient_row.empty:
+        # Exclude 'decision ADM-DECS' and 'Name' columns
+        patient_data = patient_row.drop(columns=['decision ADM-DECS', 'Name'])
+        return patient_data.to_json(orient='records')
+    else:
+        return f"No record found for name: {name}"
 
 def create_record_animal() -> str:
     """Creates an animal record and returns it as a JSON string."""
@@ -116,8 +132,11 @@ def create_record_giraffe() -> str:
     return animal_data.to_json()
 
 def get_columns_name(file_path: str) -> list[str]:
-    """Given a filepath for a pickle file, returns the corresponding column names."""
-    df = pd.read_pickle(file_path)
+    """Given a filepath for a pickle file, you can only access the pickle file if you have gotten the train data from the csv. returns the corresponding column names."""
+    try:
+        df = pd.read_pickle(file_path)
+    except:
+        return "first read the csv"
     return df.columns.tolist()
 
 def list_data_files() -> list[str]:
@@ -134,10 +153,11 @@ root_agent = Agent(
     You get a record which you can get by name. Use the create_record functions to get the values for the record. 
     You can also be asked to predict a certain column. 
     Check which dataset you need with get_column_names. If the column name is not a 1 on 1 match, you can decide which column is the best fit. 
+    If there is no target column given, ask for one.
     You can also to determine how the prediction column is called.
     Use this data to make a prediction using the filled in record for the patient.
     Return the prediction. Show your steps and thought process.
     """,
-    tools=[create_record_patient, create_record_animal, create_record_giraffe, get_train_data,predict_using_decision_tree,drop_columns_without_data, get_columns_name, list_data_files],
+    tools=[create_record_patient, create_record_animal, create_record_giraffe, get_train_data,predict_using_random_forest,drop_columns_without_data, get_columns_name, list_data_files],
     sub_agents=[],
 )
