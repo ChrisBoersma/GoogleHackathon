@@ -7,6 +7,7 @@ import numpy as np
 import pickle
 import os
 from io import StringIO
+import json
 
 def get_train_data(filename: str) -> str:
     """Open a csv file and saves the training data to a pickle file and returns the path."""
@@ -18,7 +19,13 @@ def get_train_data(filename: str) -> str:
 def drop_columns_without_data(data_path:str, patient_data:str, target_column: str) -> str:
     """Filters the data to only keep columns present in patient_data and the target column."""
     df = pd.read_pickle(data_path)
-    patient_df = pd.read_json(StringIO(patient_data))
+    try:
+        patient_df = pd.read_json(StringIO(patient_data))
+    except ValueError as e:
+        if "If using all scalar values, you must pass an index" in str(e):
+            patient_df = pd.DataFrame(json.loads(patient_data), index=[0])
+        else:
+            raise
     
     patient_columns = patient_df.columns.tolist()
     columns_to_keep = patient_columns + [target_column]
@@ -48,7 +55,13 @@ def predict_using_random_forest(data_path: str, patient_data: str, target_column
     clf = RandomForestClassifier(n_estimators=100)
     clf.fit(X, y)
     
-    patient_df = pd.read_json(patient_data)
+    try:
+        patient_df = pd.read_json(StringIO(patient_data))
+    except ValueError as e:
+        if "If using all scalar values, you must pass an index" in str(e):
+            patient_df = pd.DataFrame(json.loads(patient_data), index=[0])
+        else:
+            raise
     for col, le in encoders.items():
         if col in patient_df.columns and patient_df[col].dtype == 'object':
             known_labels = le.classes_
