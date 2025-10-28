@@ -11,3 +11,4 @@ Data/post-operative.data
 datascientist_agent/__pycache__/agent.cpython-312.pyc
 Data/class.csv
 Data/zoo.csv
+Doctor/sub_agents/PatientCommunication/__pycache__/agent.cpython-314.pyc

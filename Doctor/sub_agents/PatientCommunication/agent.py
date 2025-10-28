@@ -1,7 +1,7 @@
 from google.adk.agents.llm_agent import Agent
 
 PatientCommunication_agent = Agent(
-    model='gemini-1.5-flash',
+    model='gemini-2.5-flash',
     name='PatientCommunication_agent',
     description="Generates clear and empathetic messages for patients based on their medical status and next steps.",
     instruction="""
