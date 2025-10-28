@@ -10,7 +10,7 @@ import os
 def get_train_data(filename: str) -> str:
     """Open a csv file and saves the training data to a pickle file and returns the path."""
     data = pd.read_csv("./Data/"  + filename)
-    pickle_path = f"/home/bazarow/Projects/GoogleHackathon/temp_pickle_data/{filename.split('/')[-1].split('.')[0]}.pickle"
+    pickle_path = f"./temp_pickle_data/{filename.split('/')[-1].split('.')[0]}.pickle"
     data.to_pickle(pickle_path)
     return pickle_path
 
@@ -26,7 +26,7 @@ def drop_columns_without_data(data_path:str, patient_data:str, target_column: st
     existing_columns_to_keep = [col for col in columns_to_keep if col in df.columns]
     
     filtered_df = df[existing_columns_to_keep]
-    filtered_data_path = f"/home/bazarow/Projects/GoogleHackathon/temp_pickle_data/filtered_{data_path.split('/')[-1]}"
+    filtered_data_path = f"./temp_pickle_data/filtered_{data_path.split('/')[-1]}"
     filtered_df.to_pickle(filtered_data_path)
     return filtered_data_path
 
@@ -71,7 +71,7 @@ def create_record_patient(name: str) -> str:
     """Creates a patient record by name and returns it as a JSON string."""
     
     # Load the dataset
-    df = pd.read_csv('/home/bazarow/Projects/GoogleHackathon/Data/post-operative-data-with-names.csv')
+    df = pd.read_csv('./Data/post-operative-data-with-names.csv')
     
     # Correct column names by stripping leading/trailing spaces
     df.columns = df.columns.str.strip()
