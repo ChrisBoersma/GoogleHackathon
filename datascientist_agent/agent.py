@@ -8,6 +8,20 @@ import pickle
 import os
 from io import StringIO
 import json
+from google.adk.models.lite_llm import LiteLlm
+from dotenv import load_dotenv
+
+import os
+LITELLM_MODEL = os.environ.get('LITELLMAZUREMODEL', "openai/gpt-4.1")
+LITELLM_API_KEY = os.environ.get('LITELLMAZUREAPIKEY')
+LITELLM_API_BASE = os.environ.get('LITELLMAZUREAPIBASE')
+
+llmModel = LiteLlm(
+  model=LITELLM_MODEL,
+  api_key=LITELLM_API_KEY,
+  api_base=LITELLM_API_BASE
+)
+
 
 def get_train_data(filename: str) -> str:
     """Open a csv file and saves the training data to a pickle file and returns the path."""
@@ -147,7 +161,7 @@ def list_data_files() -> list[str]:
 
 #todo state
 root_agent = Agent(
-    model='gemini-2.5-flash',
+    model=llmModel,
     name='datascientist_agent',
     description="Answers questions about a dataset",
     

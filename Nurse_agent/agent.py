@@ -1,5 +1,19 @@
 from google.adk.agents.llm_agent import Agent
 import pandas as pd
+from google.adk.models.lite_llm import LiteLlm
+from dotenv import load_dotenv
+
+import os
+LITELLM_MODEL = os.environ.get('LITELLMAZUREMODEL', "openai/gpt-4.1")
+LITELLM_API_KEY = os.environ.get('LITELLMAZUREAPIKEY')
+LITELLM_API_BASE = os.environ.get('LITELLMAZUREAPIBASE')
+
+llmModel = LiteLlm(
+  model=LITELLM_MODEL,
+  api_key=LITELLM_API_KEY,
+  api_base=LITELLM_API_BASE
+)
+
 
 # Mock tool implementation
 def get_random_measurement(patient: str) -> dict:
@@ -63,7 +77,7 @@ def get_specific_measurement(patient: str, measurement_type: str):
     return {"status": "success", "measurement_type": actual_measurement_type, "value": value}
 
 root_agent = Agent(
-    model='gemini-2.5-flash',
+    model=llmModel,
     name='root_agent',
     description="Can get a measurement of a patient",
     instruction="You are a helpful nurse that can do a measurement of a patient. Use the 'get_measurement' tool to get a random measurement of the patient. Use the 'get_specific_measurement' tool to get a specific type of measurement of the patient. **Your final answer MUST be a valid JSON object** with keys 'measurement_type', and 'value'.",
