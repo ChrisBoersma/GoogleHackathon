@@ -13,15 +13,16 @@ from Doctor.sub_agents.PatientCommunication.agent import PatientCommunication_ag
 from Nurse_agent.agent import root_agent as Nurse_LLMAgent
 from datascientist_agent.agent import root_agent as DataScientist_agent
 
-LITELLM_MODEL = os.environ.get('LITELLMAZUREMODEL', "openai/gpt-4.1")
-LITELLM_API_KEY = os.environ.get('LITELLMAZUREAPIKEY')
-LITELLM_API_BASE = os.environ.get('LITELLMAZUREAPIBASE')
+#LITELLM_MODEL = os.environ.get('LITELLMAZUREMODEL')
+#LITELLM_API_KEY = os.environ.get('LITELLMAZUREAPIKEY')
+#LITELLM_API_BASE = os.environ.get('LITELLMAZUREAPIBASE')
+modelname = "azure/gpt-4.1"
+llmModel = LiteLlm(model=modelname)
 
-llmModel = LiteLlm(
-  model=LITELLM_MODEL,
-  api_key=LITELLM_API_KEY,
-  api_base=LITELLM_API_BASE
-)
+
+
+
+print(llmModel.model)
 
 # Agent to prepare the input for the DataScientist_agent
 prepare_ds_input = LlmAgent(

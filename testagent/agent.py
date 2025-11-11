@@ -4,15 +4,8 @@ from google.adk.models.lite_llm import LiteLlm
 from dotenv import load_dotenv
 
 import os
-LITELLM_MODEL = os.environ.get('LITELLMAZUREMODEL', "openai/gpt-4.1")
-LITELLM_API_KEY = os.environ.get('LITELLMAZUREAPIKEY')
-LITELLM_API_BASE = os.environ.get('LITELLMAZUREAPIBASE')
-
-llmModel = LiteLlm(
-  model=LITELLM_MODEL,
-  api_key=LITELLM_API_KEY,
-  api_base=LITELLM_API_BASE
-)
+modelname = "azure/gpt-4.1"
+llmModel = LiteLlm(model=modelname)
 
 
 # Mock tool implementation
