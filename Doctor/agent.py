@@ -28,7 +28,9 @@ print(llmModel.model)
 prepare_ds_input = LlmAgent(
     model=llmModel,
     name='PrepareDSInput',
-    instruction='''Take the input you received using all previous dataentries collected by the nursing agent for this individual. Only use all measurements and append the following text to it: "\n\nPredict the 'adm-decs' column."'''
+    instruction='''Take the input you received using all previous dataentries collected by the nursing agent for this individual. 
+    List all measurements that the nursing agent has done. 
+    Use this measurements and append the following text to it.: "\n\nPredict the 'adm-decs' column."'''
 )
 
 def exit_loop(tool_context: ToolContext):
@@ -54,7 +56,7 @@ checker = LlmAgent(
 # Create the LoopAgent for iterative data gathering and analysis
 data_gathering_loop = LoopAgent(
     name="DataGatheringLoop",
-    max_iterations=5,  # Safety break,
+    max_iterations=8,  # Safety break,
     sub_agents=[
         Nurse_LLMAgent,
         prepare_ds_input,

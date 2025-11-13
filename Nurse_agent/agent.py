@@ -10,6 +10,7 @@ llmModel = LiteLlm(model=modelname)
 
 # Mock tool implementation
 def get_random_measurement(patient: str) -> dict:
+    print("TOOLCALL")
     """Returns a random measurement of the patient."""
     data = pd.read_csv("./Data/post-operative-data-with-names.csv")
     # 1. Filter for the patient's data (case-insensitive partial match)
@@ -24,6 +25,7 @@ def get_random_measurement(patient: str) -> dict:
     random_value = all_values_series.sample(n=1)
     measurement_type = random_value.index[0][1]
     value = random_value.iloc[0]
+    
     return {"status": "success", "measurement_type": measurement_type, "value": value}
 
 def get_specific_measurement(patient: str, measurement_type: str):
@@ -71,10 +73,14 @@ def get_specific_measurement(patient: str, measurement_type: str):
 
 root_agent = Agent(
     model=llmModel,
-    name='root_agent',
+    name='Nursje',
     description="Can get a measurement of a patient",
-    instruction="You are a helpful nurse that can do a measurement of a patient. Use the 'get_measurement' tool to get a random measurement of the patient. Use the 'get_specific_measurement' tool to get a specific type of measurement of the patient. **Your final answer MUST be a valid JSON object** with keys 'measurement_type', and 'value'.",
-    tools=[get_random_measurement, get_specific_measurement],
+    instruction="""You are a helpful nurse that does a measurement of a patient. 
+    Use the 'get_measurement' tool to get a random measurement of the patient. 
+    Always get a new measurement when asked, so dont get this from memory. 
+    Check if you allready have this measurement, if so, do another measurement until you have a new one. 
+     **Your final answer MUST be a valid JSON object** with keys 'measurement_type', and 'value'.""" ,
+    tools=[get_random_measurement],
     sub_agents=[],
 )
 
